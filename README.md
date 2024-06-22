@@ -82,6 +82,7 @@
 services:
   bot:
     restart: always
+```
 Требования
 Список зависимостей проекта находится в requirements.txt.
 
