@@ -57,7 +57,10 @@ async def show_saved_locations(message: types.Message):
 
 def get_location_request_keyboard():
     builder = ReplyKeyboardBuilder()
-    builder.row(types.KeyboardButton(text='Отправить геолокацию', request_location=True))
+    builder.row(
+        types.KeyboardButton(text='Отправить геолокацию', request_location=True),
+        types.KeyboardButton(text='Отменить'),
+    )
     return builder.as_markup(resize_keyboard=True)
 
 
@@ -194,6 +197,12 @@ async def confirm_delete_location(callback: types.CallbackQuery):
     db.delete_location(location_id)
     await callback.message.answer("Локация успешно удалена.")
     await show_saved_locations(callback.message)
+
+
+@router.message(or_f(Command("cancel"), F.text == "Отменить"))
+async def cancel_state(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Действие отменено")
 
 
 @router.message(F.location)
