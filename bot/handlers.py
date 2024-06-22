@@ -55,6 +55,12 @@ async def show_saved_locations(message: types.Message):
         await message.answer("У вас пока нет сохраненных локаций.")
 
 
+@router.message(or_f(Command("cancel"), F.text == "Отменить"))
+async def cancel_state(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Действие отменено")
+
+
 def get_location_request_keyboard():
     builder = ReplyKeyboardBuilder()
     builder.row(
@@ -64,7 +70,7 @@ def get_location_request_keyboard():
     return builder.as_markup(resize_keyboard=True)
 
 
-def get_location_request_keyboard():
+def get_name_request_keyboard_cancel():
     builder = ReplyKeyboardBuilder()
     builder.row(
         types.KeyboardButton(text='Отменить'),
@@ -75,7 +81,7 @@ def get_location_request_keyboard():
 @router.message(or_f(Command("add_location"), F.text == "Добавить локацию"))
 async def add_location_start(message: types.Message, state: FSMContext):
     await state.set_state(AddLocation.name)
-    keyboard = get_location_request_keyboard()
+    keyboard = get_name_request_keyboard_cancel()
     await message.answer("Введите название для новой локации:", reply_markup=keyboard)
 
 
@@ -206,12 +212,6 @@ async def confirm_delete_location(callback: types.CallbackQuery):
     db.delete_location(location_id)
     await callback.message.answer("Локация успешно удалена.")
     await show_saved_locations(callback.message)
-
-
-@router.message(or_f(Command("cancel"), F.text == "Отменить"))
-async def cancel_state(message: types.Message, state: FSMContext):
-    await state.clear()
-    await message.answer("Действие отменено")
 
 
 @router.message(F.location)
