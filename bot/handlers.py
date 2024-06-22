@@ -58,7 +58,8 @@ async def show_saved_locations(message: types.Message):
 @router.message(or_f(Command("cancel"), F.text == "Отменить"))
 async def cancel_state(message: types.Message, state: FSMContext):
     await state.clear()
-    await message.answer("Действие отменено")
+    keyboard = get_location_keyboard()
+    await message.answer("Действие отменено", reply_markup=keyboard)
 
 
 def get_location_request_keyboard():
