@@ -58,7 +58,15 @@ async def show_saved_locations(message: types.Message):
 def get_location_request_keyboard():
     builder = ReplyKeyboardBuilder()
     builder.row(
-        types.KeyboardButton(text='Отправить геолокацию', request_location=True),
+        types.KeyboardButton(text='Отправить геолокацию', request_location=True)).row(
+        types.KeyboardButton(text='Отменить')
+    )
+    return builder.as_markup(resize_keyboard=True)
+
+
+def get_location_request_keyboard():
+    builder = ReplyKeyboardBuilder()
+    builder.row(
         types.KeyboardButton(text='Отменить'),
     )
     return builder.as_markup(resize_keyboard=True)
@@ -67,7 +75,8 @@ def get_location_request_keyboard():
 @router.message(or_f(Command("add_location"), F.text == "Добавить локацию"))
 async def add_location_start(message: types.Message, state: FSMContext):
     await state.set_state(AddLocation.name)
-    await message.answer("Введите название для новой локации:", reply_markup=ReplyKeyboardRemove())
+    keyboard = get_location_request_keyboard()
+    await message.answer("Введите название для новой локации:", reply_markup=keyboard)
 
 
 @router.message(StateFilter(AddLocation.name))
