@@ -9,8 +9,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.keyboards import get_location_keyboard, get_saved_locations_keyboard, get_name_request_keyboard_cancel, \
     get_location_request_keyboard
-from database.db import Database
 from bot.weather import get_current_weather, get_weather_forecast
+from database.db import Database
 
 db = Database('database/weather_bot.db')
 router = Router()
@@ -80,6 +80,27 @@ def convert_timezone(time, timezone_offset):
     return forecast_time_with_timezone.strftime('%H:%M')
 
 
+def format_date_with_weekday(input_date):
+    # Словарь для перевода дней недели на русский язык
+    weekdays_ru = {
+        0: 'понедельник',
+        1: 'вторник',
+        2: 'среда',
+        3: 'четверг',
+        4: 'пятница',
+        5: 'суббота',
+        6: 'воскресенье'
+    }
+
+    # Получаем день недели на русском языке
+    weekday_ru = weekdays_ru[input_date.weekday()]
+
+    # Форматируем результат
+    result = f"\n<b>{weekday_ru}</b> {input_date.strftime('%d.%m.%Y')}:\n"
+
+    return result
+
+
 async def process_weather_data(message, latitude, longitude):
     current_weather_data = get_current_weather(latitude, longitude)
     forecast_data = get_weather_forecast(latitude, longitude)
@@ -115,7 +136,7 @@ async def process_weather_data(message, latitude, longitude):
 
         if forecast_date != current_date:
             current_date = forecast_date
-            forecast_message += f"\n{forecast_date.strftime('%d.%m.%Y')}:\n"
+            forecast_message += format_date_with_weekday(forecast_date)
 
         forecast_time = datetime.fromtimestamp(forecast['dt']).strftime('%H:%M')
         forecast_time_with_timezone = convert_timezone(forecast_time, current_weather_data['timezone'])
